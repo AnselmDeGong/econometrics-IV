@@ -1,26 +1,12 @@
 import streamlit as st
-import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
-from sklearn.linear_model import LinearRegression
 import warnings
 warnings.filterwarnings('ignore')
 
 # 设置页面标题
 st.title("IV 理论模拟器：纯理论 IV 模型")
-
-# 显示理论模型
-st.markdown("### 理论模型")
-st.latex(r"""
-\begin{align}
-U &\sim N(0, 1) \text{ (误差项)} \\
-Z &\sim N(0, 1) \text{ (工具变量)} \\
-X &= \gamma \cdot Z + \delta \cdot U + e_1, \quad e_1 \sim N(0, 1) \text{ (γ 代表 IV 强度)} \\
-Y &= \beta \cdot X + \alpha \cdot U + \phi \cdot Z + e_2, \quad e_2 \sim N(0, 1) \text{ (φ 代表违反排他性的程度)} \\
-&\text{其中：}\beta = 1.0 \text{ (真实值)}
-\end{align}
-""")
 
 # 在侧边栏添加滑块控制参数
 st.sidebar.header("模型参数控制")
@@ -30,6 +16,48 @@ delta = st.sidebar.slider('δ (误差传导)', min_value=0.0, max_value=2.0, val
                          help="控制误差项 U 对 X 的影响")
 phi = st.sidebar.slider('φ (排他性违反)', min_value=0.0, max_value=2.0, value=0.0, step=0.1,
                        help="控制 Z 对 Y 的直接影响 (排他性违反程度)")
+
+# 动态诊断提示
+if phi > 0:
+    st.error(f'⚠️ 排他性违反：φ = {phi:.2f}，Z 直接影响 Y，IV 一致性崩塌！')
+elif gamma < 0.5:
+    st.warning(f'⚠️ 弱工具变量风险：γ = {gamma:.2f}，IV 强度不足，估计量方差将很大！')
+elif delta > 1.0:
+    st.info(f'ℹ️ 内生性偏差较大：δ = {delta:.2f}，误差项对 X 影响显著，OLS 将严重有偏！')
+
+# 模型预览区
+st.markdown("### 📋 理论模型预览")
+st.markdown("---")
+
+# 显示 X 的生成方程
+st.latex(r"X = \gamma \cdot Z + \delta \cdot U + e_1, \quad e_1 \sim N(0, 1)")
+
+# 显示 Y 的生成方程
+st.latex(r"Y = \beta \cdot X + \alpha \cdot U + \phi \cdot Z + e_2, \quad e_2 \sim N(0, 1)")
+
+# 参数说明
+st.markdown("---")
+st.markdown("### 📚 参数详解")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown("#### 变量定义")
+    st.markdown(f"""
+    - **U**: 误差项，$U \\sim N(0, 1)$
+    - **Z**: 工具变量，$Z \\sim N(0, 1)$
+    - **X**: 内生变量
+    - **Y**: 被解释变量
+    """)
+
+with col2:
+    st.markdown("#### 参数合义")
+    st.markdown(f"""
+    - **γ (gamma)** = {gamma:.2f}: 工具变量强度
+    - **δ (delta)** = {delta:.2f}: 误差传导系数
+    - **φ (phi)** = {phi:.2f}: 排他性违反程度
+    - **β (beta)** = 1.0: 真实因果效应
+    """)
 
 # 设置随机种子以确保结果可重复
 np.random.seed(42)
@@ -86,12 +114,19 @@ ssr_2sls = np.sum((Y - Y_pred_2sls)**2)
 r2_2sls = 1 - (ssr_2sls / tss)
 
 # 计算第一阶段 F 统计量
-Z_with_const = np.column_stack([np.ones(n), Z])
-u_first = np.linalg.lstsq(Z_with_const, X, rcond=None)[0]
-X_pred_first = Z_with_const @ u_first
-ssr_first = np.sum((X - X_pred_first)**2)
-msr_z = np.sum((X_pred_first - np.mean(X))**2)
-f_stat = (msr_z / 1) / (ssr_first / (n - 2))
+try:
+    Z_with_const = np.column_stack([np.ones(n), Z])
+    u_first = np.linalg.lstsq(Z_with_const, X, rcond=None)[0]
+    X_pred_first = Z_with_const @ u_first
+    ssr_first = np.sum((X - X_pred_first)**2)
+    msr_z = np.sum((X_pred_first - np.mean(X))**2)
+    # 防止分母为 0
+    if ssr_first / (n - 2) > 1e-10:
+        f_stat = (msr_z / 1) / (ssr_first / (n - 2))
+    else:
+        f_stat = np.inf
+except:
+    f_stat = np.nan
 
 # 显示结果对比
 st.markdown("---")
@@ -193,4 +228,4 @@ st.markdown(f"""
 - 2SLS 通过工具变量法消除这种偏差
 - IV 强度 (γ) 越大，2SLS 估计越精确
 - 误差传导 (δ) 影响 X 和 U 的相关性，影响 OLS 的有偏程度
-""")    
+""")
