@@ -318,14 +318,25 @@ else:
     
     # 异质性处理效应大小设置
     # HTE magnitude settings - 固定预设值，用户无需修改
-    st.sidebar.markdown("**处理效应预设值 (Treatment Effect Preset Values)**")
-    st.sidebar.info("""
-根据潜在结果框架 (Potential Outcomes Framework):
-- **Compliers (β_comp) = 5.0** 
-- **Always-takers (β_always) = 2.0**
-- **Never-takers (β_never) = 2.0**
-- **Defiers (β_defiers) = 2.0**
-    """)
+
+    if lang == 'zh':
+        st.sidebar.markdown("**处理效应预设值**")
+        st.sidebar.info("""
+根据潜在结果框架：
+- 依从者 β_comp = 5.0
+- 始终接受者 β_always = 2.0
+- 从不接受者 β_never = 2.0
+- 违抗者 β_defiers = 2.0
+        """)
+    else:
+        st.sidebar.markdown("**Treatment Effect Preset Values**")
+        st.sidebar.info("""
+Based on Potential Outcomes Framework:
+- Compliers (β_comp) = 5.0
+- Always-takers (β_always) = 2.0
+- Never-takers (β_never) = 2.0
+- Defiers (β_defiers) = 2.0
+        """)
     
     # 固定处理效应值
     # Fixed treatment effect values
