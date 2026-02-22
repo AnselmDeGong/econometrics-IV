@@ -396,7 +396,7 @@ else:
     # 原始模型显示
     # Original model display
     st.latex(r"X = \gamma \cdot Z + \delta \cdot U + e_1, \quad e_1 \sim N(0, 1)")
-    st.latex(r"Y = \beta \cdot X + \alpha \cdot U + \phi \cdot Z + e_2, \quad e_2 \sim N(0, 1)")
+    st.latex(r"Y = \beta_0 + \beta_1 X_{1i} + \mathbf{\beta} \mathbf{X} + \varepsilon_i")
     
     # 参数说明
     st.markdown("---")
@@ -418,8 +418,9 @@ else:
         st.markdown(f"""
     - **γ (gamma)** = {gamma:.2f}: {text['iv_strength']}
     - **δ (delta)** = {delta:.2f}: {text['error_transmission']}
-    - **φ (phi)** = {phi:.2f}: {text['exclusion_violation_degree']}
     - **β (beta)** = 1.0: {text['true_effect']}
+    
+    **排他性条件**: 假设工具变量 Z 仅通过内生变量 X 影响被解释变量 Y，不存在直接影响。
         """)
 
 # ======================== 数据生成与回归分析部分 (Data Generation & Regression Analysis) ========================
@@ -508,12 +509,14 @@ else:
     e1 = np.random.normal(0, 1, n)
     X = gamma * Z + delta * U + e1
     
-    # 3. Y = β·X + α·U + φ·Z + e₂ (β = 1.0 为真实值)
-    # Y = β·X + α·U + φ·Z + e₂ (β = 1.0 is true value)
+    # 3. Y = β₀ + β₁X₁ᵢ + β·X + ε (β = 1.0 为真实值)
+    # Y = β₀ + β₁X₁ᵢ + β·X + ε (β = 1.0 is true value)
+    # 注：排他性条件假设Z不直接影响Y，仅通过X影响Y
+    # Note: Exclusion restriction assumes Z affects Y only through X
     alpha = 1.0  # α 系数 / coefficient
     beta_true = 1.0  # β 真实值 / true value = 1.0
     e2 = np.random.normal(0, 1, n)
-    Y = beta_true * X + alpha * U + phi * Z + e2
+    Y = beta_true * X + alpha * U + e2
     
     # 创建数据框
     # Create dataframe
