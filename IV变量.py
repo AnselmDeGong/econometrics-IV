@@ -216,67 +216,98 @@ if '基础模型' in scenario_choice or 'Basic Model' in scenario_choice:
 else:
     use_hte = True
     
-    # 异质性处理效应参数设置
-    # HTEs parameter settings  
-    st.sidebar.markdown("**四类个体比例设置 (Individual Type Proportions)**")
-    st.sidebar.markdown("*注：比例总和将自动调整为100%*")
-    
-    # 使用数值输入的方式，确保总和为100%
-    # Use number input to ensure proportions sum to 100%
-    col_prop = st.sidebar.columns([1, 1])
-    
-    with col_prop[0]:
-        prop_compliers_temp = st.number_input(
-            '依从者 (Compliers) %', 
-            min_value=0.0, max_value=100.0, value=40.0, step=1.0, 
-            key='prop_compliers'
-        )
-        prop_always_temp = st.number_input(
-            '始终接受者 (Always-takers) %', 
-            min_value=0.0, max_value=100.0, value=30.0, step=1.0,
-            key='prop_always'
-        )
-    
-    with col_prop[1]:
-        prop_never_temp = st.number_input(
-            '从不接受者 (Never-takers) %', 
-            min_value=0.0, max_value=100.0, value=30.0, step=1.0,
-            key='prop_never'
-        )
-        prop_defiers_temp = st.number_input(
-            '违抗者 (Defiers) %', 
-            min_value=0.0, max_value=100.0, value=0.0, step=1.0,
-            key='prop_defiers'
-        )
-    
-    # 计算总和并自动调整
-    # Calculate sum and auto-adjust
-    total = prop_compliers_temp + prop_always_temp + prop_never_temp + prop_defiers_temp
-    
-    if total > 0:
-        # 按比例缩放所有值，使总和为100
-        # Scale all values proportionally to sum to 100
-        prop_compliers = prop_compliers_temp / total
-        prop_always = prop_always_temp / total
-        prop_never = prop_never_temp / total
-        prop_defiers = prop_defiers_temp / total
-    else:
-        # 如果全是0，使用默认值
-        prop_compliers = 0.4
-        prop_always = 0.3
-        prop_never = 0.3
-        prop_defiers = 0.0
-    
-    # 显示调整后的比例
-    # Display adjusted proportions
-    st.sidebar.info(f"""
-**调整后的比例 (Adjusted Proportions)**:
-- 依从者 (Compliers): {prop_compliers:.1%}
-- 始终接受者 (Always-takers): {prop_always:.1%}
-- 从不接受者 (Never-takers): {prop_never:.1%}
-- 违抗者 (Defiers): {prop_defiers:.1%}
+
+    # 语言分开设置
+    if lang == 'zh':
+        st.sidebar.markdown("**四类个体比例设置**")
+        st.sidebar.markdown("*注：比例总和将自动调整为100%*")
+        col_prop = st.sidebar.columns([1, 1])
+        with col_prop[0]:
+            prop_compliers_temp = st.number_input(
+                '依从者 %', 
+                min_value=0.0, max_value=100.0, value=40.0, step=1.0, 
+                key='prop_compliers'
+            )
+            prop_always_temp = st.number_input(
+                '始终接受者 %', 
+                min_value=0.0, max_value=100.0, value=30.0, step=1.0,
+                key='prop_always'
+            )
+        with col_prop[1]:
+            prop_never_temp = st.number_input(
+                '从不接受者 %', 
+                min_value=0.0, max_value=100.0, value=30.0, step=1.0,
+                key='prop_never'
+            )
+            prop_defiers_temp = st.number_input(
+                '违抗者 %', 
+                min_value=0.0, max_value=100.0, value=0.0, step=1.0,
+                key='prop_defiers'
+            )
+        total = prop_compliers_temp + prop_always_temp + prop_never_temp + prop_defiers_temp
+        if total > 0:
+            prop_compliers = prop_compliers_temp / total
+            prop_always = prop_always_temp / total
+            prop_never = prop_never_temp / total
+            prop_defiers = prop_defiers_temp / total
+        else:
+            prop_compliers = 0.4
+            prop_always = 0.3
+            prop_never = 0.3
+            prop_defiers = 0.0
+        st.sidebar.info(f"""
+**调整后的比例**:
+- 依从者: {prop_compliers:.1%}
+- 始终接受者: {prop_always:.1%}
+- 从不接受者: {prop_never:.1%}
+- 违抗者: {prop_defiers:.1%}
 - **总计**: {prop_compliers + prop_always + prop_never + prop_defiers:.1%}
-    """)
+        """)
+    else:
+        st.sidebar.markdown("**Individual Type Proportions**")
+        st.sidebar.markdown("*Note: The sum will be automatically adjusted to 100%*")
+        col_prop = st.sidebar.columns([1, 1])
+        with col_prop[0]:
+            prop_compliers_temp = st.number_input(
+                'Compliers %', 
+                min_value=0.0, max_value=100.0, value=40.0, step=1.0, 
+                key='prop_compliers'
+            )
+            prop_always_temp = st.number_input(
+                'Always-takers %', 
+                min_value=0.0, max_value=100.0, value=30.0, step=1.0,
+                key='prop_always'
+            )
+        with col_prop[1]:
+            prop_never_temp = st.number_input(
+                'Never-takers %', 
+                min_value=0.0, max_value=100.0, value=30.0, step=1.0,
+                key='prop_never'
+            )
+            prop_defiers_temp = st.number_input(
+                'Defiers %', 
+                min_value=0.0, max_value=100.0, value=0.0, step=1.0,
+                key='prop_defiers'
+            )
+        total = prop_compliers_temp + prop_always_temp + prop_never_temp + prop_defiers_temp
+        if total > 0:
+            prop_compliers = prop_compliers_temp / total
+            prop_always = prop_always_temp / total
+            prop_never = prop_never_temp / total
+            prop_defiers = prop_defiers_temp / total
+        else:
+            prop_compliers = 0.4
+            prop_always = 0.3
+            prop_never = 0.3
+            prop_defiers = 0.0
+        st.sidebar.info(f"""
+**Adjusted Proportions**:
+- Compliers: {prop_compliers:.1%}
+- Always-takers: {prop_always:.1%}
+- Never-takers: {prop_never:.1%}
+- Defiers: {prop_defiers:.1%}
+- **Total**: {prop_compliers + prop_always + prop_never + prop_defiers:.1%}
+        """)
     
     # 如果不是场景一（无Defiers验证），则锁定Defiers为0或显示警告
     # If not Scenario I, lock Defiers or show warning
