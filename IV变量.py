@@ -58,7 +58,9 @@ lang_dict = {
         # 新增：异质性处理效应相关文本
         'hte_section': '🎯 异质性处理效应与四类个体',
         'scenario_choice': '选择实验场景',
-        'scenario_original': '原始模型',
+            'scenario_basic': '基础模型',
+            'scenario_one_option': '场景一：无违抗者 (Defiers = 0%)',
+            'scenario_two_option': '场景二：引入违抗者 (Defiers = 20%)',
         'scenario_hte': '异质性处理效应模型',
         'compliers_label': '依从者 (Compliers) 比例',
         'always_takers_label': '始终接受者 (Always-takers) 比例',
@@ -141,7 +143,9 @@ lang_dict = {
         # New additions: Heterogeneous Treatment Effects related text
         'hte_section': '🎯 Heterogeneous Treatment Effects and Four Individual Types',
         'scenario_choice': 'Choose Experiment Scenario',
-        'scenario_original': 'Original Model',
+            'scenario_basic': 'Basic Model',
+            'scenario_one_option': 'Scenario One: No Defiers (Defiers = 0%)',
+            'scenario_two_option': 'Scenario Two: With Defiers (Defiers = 20%)',
         'scenario_hte': 'Heterogeneous Treatment Effects Model',
         'compliers_label': 'Compliers Proportion',
         'always_takers_label': 'Always-takers Proportion',
