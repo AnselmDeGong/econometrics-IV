@@ -431,7 +431,7 @@ else:
     - **δ (delta)** = {delta:.2f}: {text['error_transmission']}
     - **β (beta)** = 1.0: {text['true_effect']}
     
-    **排他性条件**: 假设工具变量 Z 仅通过内生变量 X 影响被解释变量 Y，不存在直接影响。
+    {text['exclusion_condition']}
         """)
 
 # ======================== 数据生成与回归分析部分 (Data Generation & Regression Analysis) ========================
