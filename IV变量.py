@@ -9,6 +9,7 @@ warnings.filterwarnings('ignore')
 lang_dict = {
     'zh': {
         'title': 'IV 理论模拟器：纯理论 IV 模型',
+        'exclusion_condition': '排他性条件: 假设工具变量 Z 仅通过内生变量 X 影响被解释变量 Y，不存在直接影响。',
         'original_model': '原始模型',
         'first_stage': '第一阶段',
         'second_stage': '第二阶段',
@@ -91,6 +92,7 @@ lang_dict = {
     },
     'en': {
         'title': 'IV Theory Simulator: Pure Theoretical IV Model',
+        'exclusion_condition': 'Exclusion restriction: Instrument Z affects dependent variable Y only through endogenous variable X, with no direct effect.',
         'original_model': 'Original model',
         'first_stage': 'First stage',
         'second_stage': 'Second stage',
