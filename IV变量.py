@@ -129,105 +129,174 @@ lang_dict = {
         'iv_diagnosis': '🔍 Instrument Variable Diagnosis',
         'first_stage_f': 'First-Stage F-Statistic',
         'iv_weak': 'Weak IV (F < 10)',
-        'iv_strong': 'IV Strength Sufficient',
-        'correlation': 'Corr(X, Z)',
-        'covariance': 'Cov(X, Z)',
-        'visualization': '📈 Data Visualization',
-        'scatter_plot': 'Scatter Plot: X vs Y with Regression Lines',
-        'data_point': 'Data Points',
-        'insight': '💡 Key Insights',
-        'ols_bias': 'OLS Bias',
-        'tsls_bias': '2SLS Bias',
-        'improvement': 'Improvement',
-        'explanation': 'Explanation',
-        # New additions: Heterogeneous Treatment Effects related text
-        'hte_section': '🎯 Heterogeneous Treatment Effects and Four Individual Types',
-        'scenario_choice': 'Choose Experiment Scenario',
-            'scenario_basic': 'Basic Model',
-            'scenario_one_option': 'Scenario One: No Defiers (Defiers = 0%)',
-            'scenario_two_option': 'Scenario Two: With Defiers (Defiers = 20%)',
-        'scenario_hte': 'Heterogeneous Treatment Effects Model',
-        'compliers_label': 'Compliers Proportion',
-        'always_takers_label': 'Always-takers Proportion',
-        'never_takers_label': 'Never-takers Proportion',
-        'defiers_label': 'Defiers Proportion',
-        'compliers': 'Compliers',
-        'always_takers': 'Always-takers',
-        'never_takers': 'Never-takers',
-        'defiers': 'Defiers',
-        'treatment_effect_compliers': 'Compliers True Treatment Effect (β_C)',
-        'treatment_effect_always': 'Always-takers True Treatment Effect (β_A)',
-        'treatment_effect_never': 'Never-takers True Treatment Effect (β_N)',
-        'treatment_effect_defiers': 'Defiers True Treatment Effect (β_D)',
-        'scenario_one': 'Scenario One: No Defiers (Defiers = 0%)',
-        'scenario_one_desc': 'Verify LATE (Local Average Treatment Effect) Theorem - IV estimate should perfectly recover Compliers effect',
-        'scenario_two': 'Scenario Two: With Defiers (Defiers = 20%)',
-        'scenario_two_desc': 'Demonstrate consequences of monotonicity violation - how Defiers distort IV estimates',
-        'individual_type': 'Individual Type',
-        'proportion': 'Proportion',
-        'true_effect': 'True Treatment Effect',
-        'late_theorem': '🔬 LATE Theorem Verification',
-        'late_explanation': 'LATE (Local Average Treatment Effect) guarantees that under the following assumptions, 2SLS estimates the average treatment effect for Compliers:',
-        'late_assumption_1': '1. Exclusion: Z affects Y only through D',
-        'late_assumption_2': '2. Relevance: Z is correlated with D',
-        'late_assumption_3': '3. Monotonicity: No Defiers exist',
-        'late_result_scenario1': 'Scenario One Result: Unidirectional causal chain Z→D→Y, no Defiers, all LATE assumptions satisfied',
-        'late_result_scenario2': 'Scenario Two Result: Defiers violate monotonicity, IV estimate no longer equals any single group\'s treatment effect',
-        'monotonicity_violation': '⚠️ Monotonicity Assumption Violated: When Z=1 some individuals reject treatment, when Z=0 some still accept',
-        'hte_results': 'Heterogeneous Treatment Effects Results Comparison',
-        'scenario_label': 'Experiment Scenario',
-    }
-}
 
-# 侧边栏语言选择
-language = st.sidebar.selectbox('Language / 语言', ['中文', 'English'], key='language_select')
-lang = 'zh' if language == '中文' else 'en'
-text = lang_dict[lang]
+        if use_hte:
+            if lang == 'zh':
+                st.markdown("#### 潜在结果框架中的 LATE 模型与异质性处理效应")
+                st.markdown("**二元工具变量模型**:")
+                st.markdown("""
+        **结构式：**
+        $$Y_i = \beta_0 + \beta_1 X_{1i} + \boldsymbol{\beta} \mathbf{X} + \epsilon_i$$
 
-# 设置页面标题
-st.title(text['title'])
+        其中：
+        - $Y_i$ 是被解释变量
+        - $X_{1i}$ 是内生处理变量
+        - $\mathbf{X}$ 是其他外生变量向量
+        - $\beta_1$ 是处理效应 $X_{1i}$ 的系数
+        - $\boldsymbol{\beta}$ 是其他变量系数的向量
 
-# 在侧边栏添加滑块控制参数
-st.sidebar.header(text['param_control'])
-gamma = st.sidebar.slider(text['gamma_label'], min_value=0.1, max_value=2.0, value=1.0, step=0.1,
-                          help=text['gamma_help'])
-delta = st.sidebar.slider(text['delta_label'], min_value=0.0, max_value=2.0, value=0.5, step=0.1,
-                         help=text['delta_help'])
+        **第一阶段：**
+        $$X_{1i} = \gamma_0 + \gamma_1 Z + \boldsymbol{\gamma} \mathbf{X} + v_i$$
 
-phi = st.sidebar.slider(
-    text['phi_label'],
-    min_value=0.0,
-    max_value=2.0,
-    value=0.0,
-    step=0.1,
-    help=text['phi_help']
-)
+        其中：
+        - $Z$ 是二元工具变量
+        - $\gamma_1$ 是工具变量 $Z$ 对 $X_{1i}$ 的影响（需检验其显著性）
+        - $\boldsymbol{\gamma}$ 是其他外生变量系数的向量
 
-# Add option to choose experiment scenario in sidebar
-st.sidebar.markdown("---")
-st.sidebar.header(text['hte_section'])
-scenario_options = [text['scenario_basic'], text['scenario_one_option'], text['scenario_two_option']]
-scenario_choice = st.sidebar.radio(text['scenario_choice'], scenario_options)
+        **第二阶段 / 2SLS估计：**
+        $$Y_i = \mu_0 + \mu_1 \hat{X}_{1i} + \boldsymbol{\mu} \mathbf{X} + e_i$$
 
-# 根据选择的场景显示不同的参数
-# Show different parameters based on selected scenario
-if '基础模型' in scenario_choice or 'Basic Model' in scenario_choice:
-    use_hte = False
-else:
-    use_hte = True
-    
+        其中：
+        - $\hat{X}_{1i}$ 是第一阶段对 $X_{1i}$ 的预测值
+        - $\mu_1$ 是处理效应的无偏估计
+        - $\boldsymbol{\mu}$ 是其他变量系数的向量
+                """)
+                st.markdown("---")
+                st.markdown("**潜在结果框架中的四类个体与异质性处理效应**：")
+                table_md = """
+        | 个体类型 | Z→D 关系 | 数学表达 | 真实处理效应 | 说明 |
+        |---------|---------|--------|-----------|------|
+        | 依从者 | 完全遵照 | $D_i = Z$ | $\beta_{1,comp} = 5.0$ | 受工具变量影响，Z=1时接受处理 |
+        | 始终接受者 | 始终接受 | $D_i = 1$ | $\beta_{1,always} = 2.0$ | 无论Z如何都接受处理 |
+        | 从不接受者 | 始终不接受 | $D_i = 0$ | $\beta_{1,never} = 2.0$ | 无论Z如何都不接受处理 |
+        | 违抗者 | 违抗指导 | $D_i = 1 - Z$ | $\beta_{1,defiers} = 2.0$ | 违背工具变量指导的个体 |
+                """
+                st.markdown(table_md)
+                st.markdown("---")
+                st.markdown("""
+        **LATE 定理在2SLS框架中的应用**：
 
-    # 语言分开设置
-    if lang == 'zh':
-        st.sidebar.markdown("**四类个体比例设置**")
-        st.sidebar.markdown("*注：比例总和将自动调整为100%*")
-        col_prop = st.sidebar.columns([1, 1])
-        with col_prop[0]:
-            prop_compliers_temp = st.number_input(
-                '依从者 %', 
-                min_value=0.0, max_value=100.0, value=40.0, step=1.0, 
-                key='prop_compliers'
-            )
+        当满足 LATE 假设时，2SLS第二阶段估计量收敛到依从者的平均处理效应：
+
+        $$\hat{\mu}_1^{2SLS} \xrightarrow{p} E[\beta_{1,i} \mid \text{Complier}] = \beta_{1,comp} = 5.0$$
+
+        **关键假设**：
+        1. 排他性：$Z$ 只通过 $X_{1i}$ 影响 $Y_i$
+        2. 相关性：$\gamma_1 \neq 0$，即 $Z$ 与 $X_{1i}$ 相关
+        3. 单调性：不存在违抗者，即 $P(\text{Defier}) = 0$
+
+        当违反单调性假设时（存在违抗者），第二阶段的 $\hat{\mu}_1$ 不再等于任何单一群体的处理效应。
+                """)
+                st.markdown("---")
+                st.markdown("#### 模型参数")
+                col1, col2 = st.columns([1, 1])
+                with col1:
+                    st.markdown("**四类个体比例**")
+                    rows_data = []
+                    types = ['依从者', '始终接受者', '从不接受者', '违抗者']
+                    proportions = [prop_compliers, prop_always, prop_never, prop_defiers]
+                    for t, p in zip(types, proportions):
+                        rows_data.append({'个体类型': t, '比例': f'{p:.1%}'})
+                    df_types = pd.DataFrame(rows_data)
+                    st.dataframe(df_types, use_container_width=True)
+                    if prop_defiers > 0.01 and '无Defiers' in scenario_choice:
+                        st.warning("⚠️ 检测到违抗者。这会违反单调性假设！")
+                with col2:
+                    st.markdown("**异质性处理效应**")
+                    effect_data = []
+                    effects = [
+                        ('依从者', beta_compliers),
+                        ('始终接受者', beta_always),
+                        ('从不接受者', beta_never),
+                        ('违抗者', beta_defiers)
+                    ]
+                    for t, e in effects:
+                        effect_data.append({'个体类型': t, '$\\beta_i$': f'{e:.1f}'})
+                    df_effects = pd.DataFrame(effect_data)
+                    st.dataframe(df_effects, use_container_width=True)
+            else:
+                st.markdown("#### LATE Model with Heterogeneous Treatment Effects in Potential Outcomes Framework")
+                st.markdown("**Binary Instrumental Variable Model:**")
+                st.markdown("""
+        **Structural Form:**
+        $$Y_i = \beta_0 + \beta_1 X_{1i} + \boldsymbol{\beta} \mathbf{X} + \epsilon_i$$
+
+        Where:
+        - $Y_i$ is the dependent variable
+        - $X_{1i}$ is the endogenous treatment variable
+        - $\mathbf{X}$ is the vector of other exogenous variables
+        - $\beta_1$ is the coefficient for treatment effect $X_{1i}$
+        - $\boldsymbol{\beta}$ is the parameter vector for other variables
+
+        **First Stage:**
+        $$X_{1i} = \gamma_0 + \gamma_1 Z + \boldsymbol{\gamma} \mathbf{X} + v_i$$
+
+        Where:
+        - $Z$ is the binary instrument
+        - $\gamma_1$ is the effect of instrument $Z$ on $X_{1i}$ (needs to be tested for significance)
+        - $\boldsymbol{\gamma}$ is the parameter vector for other exogenous variables
+
+        **Second Stage / 2SLS Estimation:**
+        $$Y_i = \mu_0 + \mu_1 \hat{X}_{1i} + \boldsymbol{\mu} \mathbf{X} + e_i$$
+
+        Where:
+        - $\hat{X}_{1i}$ is the fitted value from first stage
+        - $\mu_1$ is the unbiased estimate of treatment effect
+        - $\boldsymbol{\mu}$ is the parameter vector for other variables
+                """)
+                st.markdown("---")
+                st.markdown("**Four Types with Heterogeneous Effects in Potential Outcomes Framework:**")
+                table_md = """
+        | Individual Type | Z→D Relation | Mathematical Expression | True Treatment Effect | Description |
+        |-----------------|-------------|------------------------|----------------------|-------------|
+        | Compliers       | Full Compliance | $D_i = Z$ | $\beta_{1,comp} = 5.0$ | Accepts treatment when Z=1 |
+        | Always-takers   | Always Accept  | $D_i = 1$ | $\beta_{1,always} = 2.0$ | Always accepts treatment |
+        | Never-takers    | Never Accept   | $D_i = 0$ | $\beta_{1,never} = 2.0$ | Never accepts treatment |
+        | Defiers         | Defy Guidance  | $D_i = 1 - Z$ | $\beta_{1,defiers} = 2.0$ | Defies instrument guidance |
+                """
+                st.markdown(table_md)
+                st.markdown("---")
+                st.markdown("""
+        **LATE Theorem in 2SLS Framework:**
+
+        When LATE assumptions are satisfied, the second stage 2SLS estimator converges to the average treatment effect for Compliers:
+
+        $$\hat{\mu}_1^{2SLS} \xrightarrow{p} E[\beta_{1,i} \mid \text{Complier}] = \beta_{1,comp} = 5.0$$
+
+        **Key Assumptions:**
+        1. Exclusion: $Z$ affects $Y_i$ only through $X_{1i}$
+        2. Relevance: $\gamma_1 \neq 0$, i.e., $Z$ is correlated with $X_{1i}$
+        3. Monotonicity: No Defiers, i.e., $P(\text{Defier}) = 0$
+
+        When monotonicity is violated (Defiers exist), the second stage $\hat{\mu}_1$ no longer equals any single group's treatment effect.
+                """)
+                st.markdown("---")
+                st.markdown("#### Model Parameters")
+                col1, col2 = st.columns([1, 1])
+                with col1:
+                    st.markdown("**Individual Type Proportions**")
+                    rows_data = []
+                    types = ['Compliers', 'Always-takers', 'Never-takers', 'Defiers']
+                    proportions = [prop_compliers, prop_always, prop_never, prop_defiers]
+                    for t, p in zip(types, proportions):
+                        rows_data.append({'Individual Type': t, 'Proportion': f'{p:.1%}'})
+                    df_types = pd.DataFrame(rows_data)
+                    st.dataframe(df_types, use_container_width=True)
+                    if prop_defiers > 0.01 and 'Scenario One' in scenario_choice:
+                        st.warning("⚠️ Defiers detected. This violates monotonicity assumption!")
+                with col2:
+                    st.markdown("**Heterogeneous Treatment Effects**")
+                    effect_data = []
+                    effects = [
+                        ('Compliers', beta_compliers),
+                        ('Always-takers', beta_always),
+                        ('Never-takers', beta_never),
+                        ('Defiers', beta_defiers)
+                    ]
+                    for t, e in effects:
+                        effect_data.append({'Individual Type': t, '$\\beta_i$': f'{e:.1f}'})
+                    df_effects = pd.DataFrame(effect_data)
+                    st.dataframe(df_effects, use_container_width=True)
             prop_always_temp = st.number_input(
                 '始终接受者 %', 
                 min_value=0.0, max_value=100.0, value=30.0, step=1.0,
