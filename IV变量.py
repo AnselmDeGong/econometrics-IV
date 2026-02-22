@@ -9,6 +9,10 @@ warnings.filterwarnings('ignore')
 lang_dict = {
     'zh': {
         'title': 'IV 理论模拟器：纯理论 IV 模型',
+        'original_model': '原始模型',
+        'first_stage': '第一阶段',
+        'second_stage': '第二阶段',
+        'mu1_unbiased': '$\\mu_1$ 是无偏估计',
         'param_control': '模型参数控制',
         'gamma_label': 'γ (IV 强度)',
         'gamma_help': '控制工具变量 Z 对 X 的影响强度',
@@ -87,6 +91,10 @@ lang_dict = {
     },
     'en': {
         'title': 'IV Theory Simulator: Pure Theoretical IV Model',
+        'original_model': 'Original model',
+        'first_stage': 'First stage',
+        'second_stage': 'Second stage',
+        'mu1_unbiased': '$\\mu_1$ is unbiased estimator',
         'param_control': 'Model Parameter Control',
         'gamma_label': 'γ (IV Strength)',
         'gamma_help': 'Control the effect of instrument Z on X',
@@ -395,10 +403,13 @@ $$\\hat{\\mu}_1^{2SLS} \\xrightarrow{p} E[\\beta_{1,i} \\mid \\text{Complier}] =
 else:
     # 原始模型显示
     # Original model display
-    st.latex(r"X = \gamma \cdot Z + \delta \cdot U + e_1, \quad e_1 \sim N(0, 1)")
-    st.latex(r"Y = \beta_0 + \beta_1 X_{1i} + \mathbf{\beta} \mathbf{X} + \varepsilon_i")
-    
-    # 参数说明
+    st.markdown(f"**{text.get('original_model','原始模型 / Original model')}:**")
+    st.latex(r"Y_i = \beta_0 + \beta_1 X_{1i} + \mathbf{\beta} \mathbf{X} + \varepsilon_i")
+    st.markdown(f"**{text.get('first_stage','第一阶段 / First stage')}:**")
+    st.latex(r"X_{1i} = \pi_1 Z_i + \mathbf{\pi} \mathbf{X} + v_i")
+    st.markdown(f"**{text.get('second_stage','第二阶段 / Second stage')}:**")
+    st.latex(r"Y_i = \mu_0 + \mu_1 \widehat{X_{1i}} + \mathbf{\mu} \mathbf{X} + e_i")
+    st.markdown(text.get('mu1_unbiased', r"$\\mu_1$ 是无偏估计 / $\\mu_1$ is unbiased estimator"))
     st.markdown("---")
     st.markdown(f"### {text['param_detail']}")
     
