@@ -190,13 +190,11 @@ gamma = st.sidebar.slider(text['gamma_label'], min_value=0.1, max_value=2.0, val
 delta = st.sidebar.slider(text['delta_label'], min_value=0.0, max_value=2.0, value=0.5, step=0.1,
                          help=text['delta_help'])
 phi = st.sidebar.slider(text['phi_label'], min_value=0.0, max_value=2.0, value=0.0, step=0.1,
-                       help=text['phi_help'])
-
-# ======================== 异质性处理效应部分 (HTE Section) ========================
-# 在侧边栏添加选择实验场景的选项
-# Add option to choose experiment scenario in sidebar
-st.sidebar.markdown("---")
-st.sidebar.header(text['hte_section'])
+    # Add option to choose experiment scenario in sidebar
+    st.sidebar.markdown("---")
+    st.sidebar.header(text['hte_section'])
+    scenario_options = [text['scenario_basic'], text['scenario_one_option'], text['scenario_two_option']]
+    scenario_choice = st.sidebar.radio(text['scenario_choice'], scenario_options)
 scenario_choice = st.sidebar.radio(text['scenario_choice'], 
                                    ['基础模型 (Basic Model)', 
                                     '场景一: 无Defiers验证LATE (Scenario I: No Defiers - LATE Verification)',
