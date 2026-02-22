@@ -200,52 +200,91 @@ else:
     use_hte = True
     
     # 异质性处理效应参数设置
-    # HTEs parameter settings
+    # HTEs parameter settings  
     st.sidebar.markdown("**四类个体比例设置 (Individual Type Proportions)**")
+    st.sidebar.markdown("*注：比例总和将自动调整为100%*")
     
-    if '无Defiers' in scenario_choice or 'No Defiers' in scenario_choice:
-        # 场景一：无Defiers
-        # Scenario One: No Defiers
-        prop_compliers = st.sidebar.slider(text['compliers_label'], 0.0, 1.0, 0.40, 0.01)
-        prop_always = st.sidebar.slider(text['always_takers_label'], 0.0, 1.0, 0.30, 0.01)
-        prop_never = st.sidebar.slider(text['never_takers_label'], 0.0, 1.0, 0.30, 0.01)
-        prop_defiers = 1.0 - prop_compliers - prop_always - prop_never
-        if prop_defiers < 0:
-            prop_defiers = 0.0
-            prop_compliers = 0.4
-            prop_always = 0.3
-            prop_never = 0.3
-        st.sidebar.info(f"违抗者 (Defiers): {max(0, prop_defiers):.0%}")
+    # 使用数值输入的方式，确保总和为100%
+    # Use number input to ensure proportions sum to 100%
+    col_prop = st.sidebar.columns([1, 1])
+    
+    with col_prop[0]:
+        prop_compliers_temp = st.number_input(
+            '依从者 (Compliers) %', 
+            min_value=0.0, max_value=100.0, value=40.0, step=1.0, 
+            key='prop_compliers'
+        )
+        prop_always_temp = st.number_input(
+            '始终接受者 (Always-takers) %', 
+            min_value=0.0, max_value=100.0, value=30.0, step=1.0,
+            key='prop_always'
+        )
+    
+    with col_prop[1]:
+        prop_never_temp = st.number_input(
+            '从不接受者 (Never-takers) %', 
+            min_value=0.0, max_value=100.0, value=30.0, step=1.0,
+            key='prop_never'
+        )
+        prop_defiers_temp = st.number_input(
+            '违抗者 (Defiers) %', 
+            min_value=0.0, max_value=100.0, value=0.0, step=1.0,
+            key='prop_defiers'
+        )
+    
+    # 计算总和并自动调整
+    # Calculate sum and auto-adjust
+    total = prop_compliers_temp + prop_always_temp + prop_never_temp + prop_defiers_temp
+    
+    if total > 0:
+        # 按比例缩放所有值，使总和为100
+        # Scale all values proportionally to sum to 100
+        prop_compliers = prop_compliers_temp / total
+        prop_always = prop_always_temp / total
+        prop_never = prop_never_temp / total
+        prop_defiers = prop_defiers_temp / total
     else:
-        # 场景二：含Defiers (20%)
-        # Scenario Two: With Defiers (20%)
-        prop_compliers = 0.20
-        prop_always = 0.30
-        prop_never = 0.30
-        prop_defiers = 0.20
-        st.sidebar.info(f"""
-预设比例 (Preset Proportions):
-- 依从者 (Compliers): {prop_compliers:.0%}
-- 始终接受者 (Always-takers): {prop_always:.0%}
-- 从不接受者 (Never-takers): {prop_never:.0%}
-- 违抗者 (Defiers): {prop_defiers:.0%}
-        """)
+        # 如果全是0，使用默认值
+        prop_compliers = 0.4
+        prop_always = 0.3
+        prop_never = 0.3
+        prop_defiers = 0.0
+    
+    # 显示调整后的比例
+    # Display adjusted proportions
+    st.sidebar.info(f"""
+**调整后的比例 (Adjusted Proportions)**:
+- 依从者 (Compliers): {prop_compliers:.1%}
+- 始终接受者 (Always-takers): {prop_always:.1%}
+- 从不接受者 (Never-takers): {prop_never:.1%}
+- 违抗者 (Defiers): {prop_defiers:.1%}
+- **总计**: {prop_compliers + prop_always + prop_never + prop_defiers:.1%}
+    """)
+    
+    # 如果不是场景一（无Defiers验证），则锁定Defiers为0或显示警告
+    # If not Scenario I, lock Defiers or show warning
+    if '无Defiers' in scenario_choice and prop_defiers > 0.01:
+        st.sidebar.warning("⚠️ 场景一应使用 0% Defiers 来验证 LATE 定理")
+    elif '含Defiers' in scenario_choice and prop_defiers < 0.01:
+        st.sidebar.info("ℹ️ 场景二建议设置 Defiers > 0 来观察其影响")
     
     # 异质性处理效应大小设置
-    # HTE magnitude settings
-    st.sidebar.markdown("**处理效应设置 (Treatment Effect Settings)**")
-    beta_compliers = st.sidebar.slider(text['treatment_effect_compliers'], 0.0, 10.0, 5.0, 0.5)
-    beta_always = st.sidebar.slider(text['treatment_effect_always'], 0.0, 10.0, 2.0, 0.5)
-    beta_never = st.sidebar.slider(text['treatment_effect_never'], 0.0, 10.0, 2.0, 0.5)
-    beta_defiers = st.sidebar.slider(text['treatment_effect_defiers'], 0.0, 10.0, 2.0, 0.5)
-
-
-if phi > 0:
-    st.error(f'⚠️ {text["exclusion_violation"].format(phi)}')
-elif gamma < 0.5:
-    st.warning(f'⚠️ {text["weak_iv"].format(gamma)}')
-elif delta > 1.0:
-    st.info(f'ℹ️ {text["endogeneity_bias"].format(delta)}')
+    # HTE magnitude settings - 固定预设值，用户无需修改
+    st.sidebar.markdown("**处理效应预设值 (Treatment Effect Preset Values)**")
+    st.sidebar.info("""
+根据潜在结果框架 (Potential Outcomes Framework):
+- **Compliers (β_comp) = 5.0** 
+- **Always-takers (β_always) = 2.0**
+- **Never-takers (β_never) = 2.0**
+- **Defiers (β_defiers) = 2.0**
+    """)
+    
+    # 固定处理效应值
+    # Fixed treatment effect values
+    beta_compliers = 5.0
+    beta_always = 2.0
+    beta_never = 2.0
+    beta_defiers = 2.0
 
 # 模型预览区
 st.markdown(f"### {text['model_preview']}")
@@ -254,80 +293,105 @@ st.markdown("---")
 # 根据场景显示不同的模型
 # Show different models based on scenario
 if use_hte:
-    st.markdown("#### 异质性处理效应模型 (Heterogeneous Treatment Effect Model)")
+    st.markdown("#### 潜在结果框架中的 LATE 模型与异质性处理效应")
+    st.markdown("(LATE Model with Heterogeneous Treatment Effects in Potential Outcomes Framework)")
+    
     st.markdown("""
-**结构式方程 (Structural Equations):**
+**二元工具变量模型 (Binary Instrumental Variable Model)**:
 
-1. **Z 的生成** (Instrument Generation):
-   $Z \\sim \\text{Bernoulli}(0.5)$
-   
-2. **个体类型分配** (Individual Type Assignment):
-   根据概率为每个个体分配四种类型之一：
-   - Compliers (C): 概率为 $P_C$
-   - Always-takers (A): 概率为 $P_A$
-   - Never-takers (N): 概率为 $P_N$
-   - Defiers (D): 概率为 $P_D = 1 - P_C - P_A - P_N$
+**结构式 (Structural Form):**
+$$Y_i = \\beta_0 + \\beta_1 X_{1i} + \\boldsymbol{\\beta} \\mathbf{X} + \\epsilon_i$$
 
-3. **处理变量定义** (Treatment Variable Definition):
-   - 若为 Compliers: $D = Z$
-   - 若为 Always-takers: $D = 1$
-   - 若为 Never-takers: $D = 0$
-   - 若为 Defiers: $D = 1 - Z$
+其中：
+- $Y_i$ 是被解释变量 (dependent variable)
+- $X_{1i}$ 是内生处理变量 (endogenous treatment variable)
+- $\\mathbf{X}$ 是其他外生变量向量 (other exogenous variables)
+- $\\beta_1$ 是处理效应 $X_{1i}$ 的系数
+- $\\boldsymbol{\\beta}$ 是其他变量系数的**向量** (parameter vector)
 
-4. **结果变量生成** (Outcome Variable Generation):
-   $Y = \\beta_i \\cdot D + U$，其中 $\\beta_i$ 为个体类型 $i$ 的处理效应，$U \\sim N(0, 1)$
+**第一阶段 (First Stage):**
+$$X_{1i} = \\gamma_0 + \\gamma_1 Z + \\boldsymbol{\\gamma} \\mathbf{X} + v_i$$
+
+其中：
+- $Z$ 是二元工具变量 (binary instrument)
+- $\\gamma_1$ 是工具变量 $Z$ 对 $X_{1i}$ 的影响（**需检验其显著性**)
+- $\\boldsymbol{\\gamma}$ 是其他外生变量系数的**向量** (parameter vector)
+
+**第二阶段 (Second Stage) / 2SLS估计:**
+$$Y_i = \\mu_0 + \\mu_1 \\hat{X}_{1i} + \\boldsymbol{\\mu} \\mathbf{X} + e_i$$
+
+其中：
+- $\\hat{X}_{1i}$ 是第一阶段对 $X_{1i}$ 的**预测值** (fitted value from first stage)
+- $\\mu_1$ 是处理效应的**无偏估计** (unbiased estimate of treatment effect)
+- $\\boldsymbol{\\mu}$ 是其他变量系数的**向量** (parameter vector)
+    """)
+    
+    st.markdown("---")
+    st.markdown("**潜在结果框架中的四类个体与异质性处理效应** (Four Types with Heterogeneous Effects in Potential Outcomes Framework):")
+    
+    # 创建表格
+    table_md = """
+| 个体类型 | Z→D 关系 | 数学表达 | 真实处理效应 | 说明 |
+|---------|---------|--------|-----------|------|
+| **Compliers** (依从者) | 完全遵照 | $D_i = Z$ | $\\beta_{1,comp} = 5.0$ | 受工具变量影响，Z=1时接受处理 |
+| **Always-takers** | 始终接受 | $D_i = 1$ | $\\beta_{1,always} = 2.0$ | 无论Z如何都接受处理 |
+| **Never-takers** | 始终不接受 | $D_i = 0$ | $\\beta_{1,never} = 2.0$ | 无论Z如何都不接受处理 |
+| **Defiers** (违抗者) | 违抗指导 | $D_i = 1 - Z$ | $\\beta_{1,defiers} = 2.0$ | 违背工具变量指导的个体 |
+    """
+    st.markdown(table_md)
+    
+    st.markdown("---")
+    st.markdown("""
+**LATE 定理在2SLS框架中的应用**:
+
+当满足 LATE 假设时，2SLS第二阶段估计量收敛到 Compliers 的平均处理效应：
+
+$$\\hat{\\mu}_1^{2SLS} \\xrightarrow{p} E[\\beta_{1,i} \\mid \\text{Complier}] = \\beta_{1,comp} = 5.0$$
+
+**关键假设**：
+1. **排他性 (Exclusion Restriction)**: $Z$ 只通过 $X_{1i}$ 影响 $Y_i$
+2. **相关性 (Relevance)**: $\\gamma_1 \\neq 0$，即 $Z$ 与 $X_{1i}$ 相关
+3. **单调性 (Monotonicity)**: 不存在 Defiers，即 $P(\\text{Defier}) = 0$
+
+当违反单调性假设时（存在 Defiers），第二阶段的 $\\hat{\\mu}_1$ 不再等于任何单一群体的处理效应。
     """)
     
     # 显示参数设置
-    # Display parameter settings
     st.markdown("---")
-    st.markdown(f"#### {text['param_detail']}")
+    st.markdown(f"#### 模型参数 (Model Parameters)")
     
-    tab1, tab2 = st.tabs(['个体类型与比例 (Individual Types)', '处理效应 (Treatment Effects)'])
+    # 创建更清晰的展示
+    col1, col2 = st.columns([1, 1])
     
-    with tab1:
+    with col1:
+        st.markdown("**四类个体比例**")
         rows_data = []
-        types = [text['compliers'], text['always_takers'], text['never_takers'], text['defiers']]
+        types = ['Compliers (依从者)', 'Always-takers (始终接受)', 'Never-takers (从不接受)', 'Defiers (违抗者)']
         proportions = [prop_compliers, prop_always, prop_never, prop_defiers]
         for t, p in zip(types, proportions):
-            rows_data.append({'个体类型 (Type)': t, '比例 (Proportion)': f'{p:.0%}'})
+            rows_data.append({'个体类型': t, '比例': f'{p:.1%}'})
         
         df_types = pd.DataFrame(rows_data)
         st.dataframe(df_types, use_container_width=True)
         
-        if prop_defiers > 0 and '无Defiers' in scenario_choice:
-            st.warning("⚠️ 警告：检测到 Defiers 的存在。这会违反单调性假设，影响 LATE 估计量的有效性！")
+        if prop_defiers > 0.01 and '无Defiers' in scenario_choice:
+            st.warning("⚠️ 检测到 Defiers。这会违反单调性假设！")
     
-    with tab2:
+    with col2:
+        st.markdown("**异质性处理效应**")
         effect_data = []
         effects = [
-            (text['compliers'], beta_compliers),
-            (text['always_takers'], beta_always),
-            (text['never_takers'], beta_never),
-            (text['defiers'], beta_defiers)
+            ('Compliers', beta_compliers),
+            ('Always-takers', beta_always),
+            ('Never-takers', beta_never),
+            ('Defiers', beta_defiers)
         ]
         for t, e in effects:
-            effect_data.append({'个体类型 (Type)': t, '处理效应 β (Treatment Effect)': f'{e:.2f}'})
+            effect_data.append({'个体类型': t, '$\\\\beta_i$': f'{e:.1f}'})
         
         df_effects = pd.DataFrame(effect_data)
         st.dataframe(df_effects, use_container_width=True)
-        
-        if lang == 'zh':
-            st.markdown(f"""
-**关键参数**：
-- **依从者处理效应 (Compliers β_C)**: {beta_compliers:.2f} - 只在接收 Z=1 指导时才接受处理的个体
-- **始终接受者处理效应 (Always-takers β_A)**: {beta_always:.2f} - 无论 Z 如何都接受处理
-- **从不接受者处理效应 (Never-takers β_N)**: {beta_never:.2f} - 无论 Z 如何都不接受处理
-- **违抗者处理效应 (Defiers β_D)**: {beta_defiers:.2f} - 与指导相反的个体 (Z=1 拒绝，Z=0 接受)
-            """)
-        else:
-            st.markdown(f"""
-**Key Parameters**:
-- **Compliers Treatment Effect (β_C)**: {beta_compliers:.2f} - Individuals who comply with Z=1 to accept treatment
-- **Always-takers Treatment Effect (β_A)**: {beta_always:.2f} - Always accept treatment regardless of Z
-- **Never-takers Treatment Effect (β_N)**: {beta_never:.2f} - Never accept treatment regardless of Z
-- **Defiers Treatment Effect (β_D)**: {beta_defiers:.2f} - Individuals who do opposite of assignment (Z=1 reject, Z=0 accept)
-            """)
+
 else:
     # 原始模型显示
     # Original model display
