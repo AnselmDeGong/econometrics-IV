@@ -625,13 +625,15 @@ else:
     bias_2sls = beta_2sls_coef - beta_true
 
     st.markdown(f"""
-- **{text['ols_bias']}**: {bias_ols:.4f} ({(bias_ols/beta_true)*100:.2f}%)
-- **{text['tsls_bias']}**: {bias_2sls:.4f} ({(bias_2sls/beta_true)*100:.2f}%)
-- **{text['improvement']}**: {abs(bias_ols - bias_2sls):.4f}
 
 **{text['explanation']}**:
-- {text['explanation'] if lang == 'en' else '当 φ > 0 时，Z 直接影响 Y，违反排他性假设，导致 OLS 有偏差'}
-- {text['explanation'] if lang == 'en' else '2SLS 通过工具变量法消除这种偏差'}
-- {text['explanation'] if lang == 'en' else 'IV 强度 (γ) 越大，2SLS 估计越精确'}
-- {text['explanation'] if lang == 'en' else '误差传导 (δ) 影响 X 和 U 的相关性，影响 OLS 的有偏程度'}
     """)
+
+    if lang == 'en':
+            st.markdown("""
+            - When φ > 0, Z directly affects Y, violating the exclusion restriction and causing OLS bias.
+            - 2SLS eliminates this bias using the instrumental variable method.
+            - The stronger the IV (γ), the more precise the 2SLS estimate.
+            - Error transmission (δ) affects the correlation between X and U, impacting the degree of OLS bias.
+            """
+            )
