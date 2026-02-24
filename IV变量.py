@@ -637,3 +637,11 @@ else:
             - Error transmission (δ) affects the correlation between X and U, impacting the degree of OLS bias.
             """
             )
+    elif lang == 'zh':
+        st.markdown("""
+        - 当 φ > 0 时，Z 会直接影响 Y，违反排他性条件，导致 OLS 回归产生偏差。
+        - 2SLS 利用工具变量方法消除该偏差。
+        - 工具变量越强（γ 越大），2SLS 估计越精确。
+        - 误差传导（δ）影响 X 与 U 的相关性，进而影响 OLS 偏差程度。
+        """
+        )
