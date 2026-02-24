@@ -226,8 +226,8 @@ lang_dict = {
 }
 
 # 侧边栏语言选择
-language = st.sidebar.selectbox('Language / 语言', ['中文', 'English'], key='language_select')
-lang = 'zh' if language == '中文' else 'en'
+language = st.sidebar.selectbox('Language / 语言', ['English', '中文'], key='language_select')
+lang = 'en' if language == 'English' else 'zh'
 text = lang_dict[lang]
 
 # 设置页面标题
