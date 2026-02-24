@@ -352,10 +352,10 @@ $$Y_i = \\mu_0 + \\mu_1 \\hat{X}_{1i} + \\boldsymbol{\\mu} \\mathbf{X} + e_i$$
     with col2:
         st.markdown(text['effect_preset_title'])
         effect_data = [
-            {text['individual_type']: 'Compliers', '$\beta_i$': f'{beta_compliers:.1f}'},
-            {text['individual_type']: 'Always-takers', '$\beta_i$': f'{beta_always:.1f}'},
-            {text['individual_type']: 'Never-takers', '$\beta_i$': f'{beta_never:.1f}'},
-            {text['individual_type']: 'Defiers', '$\beta_i$': f'{beta_defiers:.1f}'}
+            {text['individual_type']: 'Compliers', '$\\beta_i$': f'{beta_compliers:.1f}'},
+            {text['individual_type']: 'Always-takers', '$\\beta_i$': f'{beta_always:.1f}'},
+            {text['individual_type']: 'Never-takers', '$\\beta_i$': f'{beta_never:.1f}'},
+            {text['individual_type']: 'Defiers', '$\\beta_i$': f'{beta_defiers:.1f}'}
         ]
         st.dataframe(pd.DataFrame(effect_data), use_container_width=True)
 
@@ -413,7 +413,6 @@ else:
     alpha = 1.0
     beta_true = 1.0
     e2 = np.random.normal(0, 1, n)
-    # 修复了原代码中未将 phi 纳入 Y 生成的逻辑问题
     Y = beta_true * X + alpha * U + phi * Z + e2
 
 # ======================== 回归分析部分 ========================
