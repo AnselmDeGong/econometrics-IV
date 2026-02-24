@@ -352,10 +352,10 @@ $$Y_i = \\mu_0 + \\mu_1 \\hat{X}_{1i} + \\boldsymbol{\\mu} \\mathbf{X} + e_i$$
     with col2:
         st.markdown(text['effect_preset_title'])
         effect_data = [
-            {text['individual_type']: 'Compliers', '$\\beta_i$': f'{beta_compliers:.1f}'},
-            {text['individual_type']: 'Always-takers', '$\\beta_i$': f'{beta_always:.1f}'},
-            {text['individual_type']: 'Never-takers', '$\\beta_i$': f'{beta_never:.1f}'},
-            {text['individual_type']: 'Defiers', '$\\beta_i$': f'{beta_defiers:.1f}'}
+            {text['individual_type']: 'Compliers', 'βᵢ': f'{beta_compliers:.1f}'},
+            {text['individual_type']: 'Always-takers', 'βᵢ': f'{beta_always:.1f}'},
+            {text['individual_type']: 'Never-takers', 'βᵢ': f'{beta_never:.1f}'},
+            {text['individual_type']: 'Defiers', 'βᵢ': f'{beta_defiers:.1f}'}
         ]
         st.dataframe(pd.DataFrame(effect_data), use_container_width=True)
 
